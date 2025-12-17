@@ -1,9 +1,8 @@
 <template>
-  <div class="view">
-    <Header />
+  <NuxtRouteAnnouncer />
+  <NuxtLayout>
     <NuxtPage />
-    <Footer />
-  </div>
+  </NuxtLayout>
 </template>
 
 <script setup></script>
