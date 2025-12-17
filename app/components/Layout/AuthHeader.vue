@@ -2,8 +2,6 @@
   <div class="header">
     <NuxtImg src="/svg/logo.svg" alt="logo" class="header__logo" />
     <nav class="header__routs">
-      <a href="/list">Программы</a>
-      <a href="/about">О нас</a>
     </nav>
     <nav class="header__auth">
       <a href="/auth">Регистрация</a>
