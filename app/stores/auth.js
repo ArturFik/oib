@@ -1,7 +1,8 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
 
 export const useCoreAuthStore = defineStore("auth", () => {
-  const sign = useCookie("access_token", { httpOnly: true });
+  const { KEY } = useRuntimeConfig().public;
+  const sign = useCookie(KEY, { httpOnly: true });
 
   const getToken = computed(() => sign.value);
 

@@ -43,7 +43,7 @@
         </div>
         <div class="">
           <h2 class="home__block--span">Начни свой путь вместе с нами!</h2>
-          <div class="home__block--button">НАЧАТЬ ОБУЧЕНИЕ</div>
+          <NuxtLink to="/auth" class="home__block--button">НАЧАТЬ ОБУЧЕНИЕ</NuxtLink>
         </div>
       </div>
       <div class="home__block--view">

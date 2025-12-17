@@ -20,7 +20,7 @@ export const useUserStore = defineStore('user', () => {
             return getUser.value
         }
 
-        return `${getUser.value?.name} ${getUser.value?.soname}`
+        return getUser.value?.username || 'Пользователь'
     })
 
     return {
