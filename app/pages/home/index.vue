@@ -111,7 +111,7 @@
 <script>
 import API_HANDLER from "~/hooks/api_handler";
 import { GET_BOOK_IMAGE } from "~/configs/api/urls";
-console.log("efwfwe");
+
 onMounted(async () => {
   try {
     const resData = await API_HANDLER(GET_BOOK_IMAGE);

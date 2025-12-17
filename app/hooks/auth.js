@@ -8,11 +8,8 @@ export default function useAuth() {
 
   const user = reactive({
     email: "",
-    father_name: "",
     name: "",
     password: "",
-    phone: "+79",
-    soname: "",
   });
 
   const errorsState = ref({});
@@ -21,27 +18,10 @@ export default function useAuth() {
   const errorMassage = ref("");
   const errorList = ref([]);
 
-  const validationPhone = computed(() => {
-    if (validateHandler.value) {
-      return user.phone.length >= 12;
-    }
-  });
-
-  const validationFamily = computed(() => {
-    if (validateHandler.value) {
-      return user.soname.length >= 1;
-    }
-  });
 
   const validationName = computed(() => {
     if (validateHandler.value) {
       return user.name.length >= 1;
-    }
-  });
-
-  const validationFather = computed(() => {
-    if (validateHandler.value) {
-      return user.father_name.length >= 1;
     }
   });
 
@@ -59,21 +39,20 @@ export default function useAuth() {
 
   const loginValid = computed(() => {
     return (
-      (validationPhone.value || validationEmail.value) &&
+      validationEmail.value &&
       validationPassword.value
     );
   });
 
   const registerValid = computed(() => {
     return (
-      validationPhone.value &&
-      validationFamily.value &&
-      validationFather.value &&
+      validationName.value &&
       validationEmail.value
     );
   });
 
   const signUp = async () => {
+    console.log(user)
     errorList.value = [];
     validateHandler.value = true;
 
@@ -82,13 +61,7 @@ export default function useAuth() {
         ...REGISTER,
         body: {
           ...user,
-          phone: user?.phone
-            .replaceAll("(", "")
-            .replaceAll(")", "")
-            .replaceAll(" ", "")
-            .replaceAll("-", "")
-            .replaceAll("–", "")
-            .replaceAll("_", ""),
+          
         },
       });
       if (register?.status) {
@@ -104,20 +77,22 @@ export default function useAuth() {
   };
 
   const signIn = async () => {
+    console.log(user)
     validateHandler.value = true;
     errorMassage.value = "";
     const body = {
-      email: user?.email,
-      password: user?.password,
-    };
+       email: user?.email,
+       password: user?.password,
+     };
 
     try {
       const login = await API_HANDLER({
         ...LOGIN_ACCESS_TOKEN,
         body,
       });
-      if (login?.status) {
-        location.href = `${CORE.ROOT}`;
+      if (login) {
+        userStore.setToken(login);
+        //location.href = `${CORE.ROOT}`;
         console.log("успешная авторизация");
       } else {
         errorMassage.value = "Неправильный логин или пароль";

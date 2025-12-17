@@ -1,11 +1,22 @@
 import AUTH from "~/configs/routes/auth";
+import { useUserStore } from "~/stores/user";
 
 async function downloadFile(url) {
   try {
+    const { getToken } = useUserStore();
+
+    const headers = {};
+
+    if (getToken?.access_token && getToken?.token_type) {
+      headers.Authorization = `${getToken.token_type} ${getToken.access_token}`;
+    }
+
     const response = await fetch(url, {
       method: "GET",
       credentials: "include",
+      headers,
     });
+
     if (!response.ok)
       throw new Error(`Ошибка загрузки файла: ${response.statusText}`);
 
@@ -15,12 +26,9 @@ async function downloadFile(url) {
         .get("content-disposition")
         ?.split("filename*=UTF-8''")?.[1]
         ?.replace(/"/g, "") || null;
-    let fileName;
-    if (fileNameValue !== null) {
-      fileName = decodeURIComponent(fileNameValue);
-    } else {
-      fileName = null;
-    }
+
+    const fileName =
+      fileNameValue !== null ? decodeURIComponent(fileNameValue) : null;
 
     const link = Object.assign(document.createElement("a"), {
       href: URL.createObjectURL(blob),
@@ -37,10 +45,20 @@ async function downloadFile(url) {
 }
 
 export default async function API_HANDLER(payload) {
-  const { path, method, args, isDownload = false, ...params } = payload;
+  const { path, method, args, isDownload = false, headers = {}, ...params } =
+    payload;
   const { MAIN_API_URL } = useRuntimeConfig().public;
+  const { getToken } = useUserStore();
 
   const url = `${MAIN_API_URL}/${path}${args ? args : ""}`;
+
+  const authHeaders = {
+    ...headers,
+  };
+
+  if (getToken?.access_token && getToken?.token_type) {
+    authHeaders.Authorization = `${getToken.token_type} ${getToken.access_token}`;
+  }
 
   try {
     if (isDownload) {
@@ -49,22 +67,11 @@ export default async function API_HANDLER(payload) {
     const response_data = await $fetch(url, {
       method,
       credentials: "include",
+      headers: authHeaders,
       ...params,
     });
-    /* if (!response_data?.status) {
-      useApiErrorsStore().addError(url, response_data);
-    } */
     return response_data;
   } catch (e) {
     console.log("ER", e);
-    /* if ([403].includes(e.status)) {
-      return; navigateTo(
-        {
-          name: AUTH.LOGOUT,
-          replace: true,
-        },
-        { external: true }
-      );
-    } */
   }
 }
