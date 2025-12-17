@@ -5,8 +5,14 @@
       <a href="/">Главная</a>
       <a href="/list">Программы</a>
     </nav>
-    <nav class="header__auth">
-      <a href="#">Артем</a>
+    <nav class="header__auth" v-if="isAuthenticated">
+      <a href="#">{{ userName || 'Пользователь' }}</a>
+      <div class="header__auth--ico" @click="handleLogout">
+        <NuxtImg src="/svg/auth.svg" alt="auth" />
+      </div>
+    </nav>
+    <nav class="header__auth" v-else>
+      <NuxtLink to="/auth">Войти</NuxtLink>
       <div class="header__auth--ico">
         <NuxtImg src="/svg/auth.svg" alt="auth" />
       </div>
@@ -14,7 +20,22 @@
   </div>
 </template>
 
-<script></script>
+<script setup>
+import { useCoreAuthStore } from "~/stores/auth";
+import { useUserStore } from "~/stores/user";
+import { CORE } from "~/configs/routes/core";
+import { AUTH } from "~/configs/routes/auth";
+
+const authStore = useCoreAuthStore();
+const userStore = useUserStore();
+
+const isAuthenticated = computed(() => !!authStore.getToken);
+const userName = computed(() => userStore.userName || 'Пользователь');
+
+const handleLogout = () => {
+  navigateTo(`/${AUTH.LOGOUT}`);
+};
+</script>
 
 <style lang="scss" scoped>
 .header {

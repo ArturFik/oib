@@ -1,23 +1,17 @@
-import AUTH from "~/configs/routes/auth";
+import { AUTH } from "~/configs/routes/auth";
 import { CORE } from "~/configs/routes/core";
 import { useCoreAuthStore } from "~/stores/auth";
 
 export default defineNuxtRouteMiddleware((to, from) => {
-  const { KEY } = useRuntimeConfig().public;
-  const AUTH_TOKEN = useCookie(KEY);
+  const authStore = useCoreAuthStore();
   const router = useRouter();
 
   if (to.name === AUTH.LOGOUT) {
-    AUTH_TOKEN.value = null;
-    useCoreAuthStore().setTokens(AUTH_TOKEN.value);
+    authStore.clearTokens();
     return;
   }
 
-  if (import.meta.server) {
-    useCoreAuthStore().setTokens(AUTH_TOKEN.value);
-  }
-
-  const isAuthenticated = !!AUTH_TOKEN.value || !!useCoreAuthStore().getToken;
+  const isAuthenticated = !!authStore.getToken;
 
   if (
     (to.name === AUTH.SIGN_IN || to.name === AUTH.SIGN_UP) &&

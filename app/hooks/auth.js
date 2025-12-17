@@ -66,13 +66,21 @@ export default function useAuth() {
           
         },
       });
-      if (register) {
-        window.location.reload();
+      if (register && register.access_token) {
+        // Store the token after successful registration
+        useAuth.setTokens(register.access_token);
+        
+        // Fetch user data after successful registration
+        await FetchUser();
+        
+        // Redirect to home page
+        location.href = `${CORE.ROOT}`;
       } else {
-        errorList.value = register?.message?.errors;
+        errorList.value = register?.message?.errors || "Ошибка при регистрации";
       }
     } catch (error) {
       console.log(error);
+      errorList.value = ["Ошибка при регистрации. Попробуйте еще раз."];
     } finally {
       validateHandler.value = false;
     }
@@ -92,7 +100,13 @@ export default function useAuth() {
         ...LOGIN_ACCESS_TOKEN,
         body,
       });
-      if (login) {
+      if (login && login.access_token) {
+        // Store the token in the auth store
+        useAuth.setTokens(login.access_token);
+        
+        // Fetch user data after successful login
+        await FetchUser();
+        
         location.href = `${CORE.ROOT}`;
         console.log("успешная авторизация", login);
       } else {
@@ -100,6 +114,7 @@ export default function useAuth() {
       }
     } catch (error) {
       console.log(error);
+      errorMassage.value = "Ошибка при входе. Попробуйте еще раз.";
     } finally {
       validateHandler.value = false;
     }
@@ -108,8 +123,8 @@ export default function useAuth() {
   const FetchUser = async () => {
     try {
       const resData = await API_HANDLER(GET_CURRENT_USER);
-      if (resData?.status) {
-        userStore.setUser(resData.data);
+      if (resData) {
+        userStore.setUser(resData);
       }
     } catch (err) {
       console.log(err);
