@@ -10,7 +10,6 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     public: {
-      KEY: "access_token",
       MAIN_API_URL,
     },
   },

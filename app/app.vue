@@ -15,8 +15,12 @@ const authStore = useCoreAuthStore();
 const userStore = useUserStore();
 const { FetchUser } = useAuth();
 
-// On app startup, check if user is authenticated and fetch user data
+// On app startup, initialize token and fetch user data if authenticated
 onMounted(async () => {
+  // Initialize token from localStorage
+  authStore.initializeToken();
+  
+  // If token exists, fetch user data
   if (authStore.getToken) {
     try {
       await FetchUser();

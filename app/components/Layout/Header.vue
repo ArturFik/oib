@@ -6,13 +6,13 @@
       <a href="/list">Программы</a>
     </nav>
     <nav class="header__auth" v-if="isAuthenticated">
-      <a href="#">{{ userName }}</a>
+      <a href="#">{{ userName || 'Пользователь' }}</a>
       <div class="header__auth--ico" @click="handleLogout">
         <NuxtImg src="/svg/auth.svg" alt="auth" />
       </div>
     </nav>
     <nav class="header__auth" v-else>
-      <a href="/auth">Войти</a>
+      <NuxtLink to="/auth">Войти</NuxtLink>
       <div class="header__auth--ico">
         <NuxtImg src="/svg/auth.svg" alt="auth" />
       </div>

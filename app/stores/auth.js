@@ -1,24 +1,50 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
 
 export const useCoreAuthStore = defineStore("auth", () => {
-  const { KEY } = useRuntimeConfig().public;
-  const sign = useCookie(KEY, { httpOnly: true });
+  // Initialize token from localStorage if it exists
+  const token = ref(null);
 
-  const getToken = computed(() => sign.value);
+  // Initialize token on client side
+  const initializeToken = () => {
+    if (process.client) {
+      const storedToken = localStorage.getItem('access_token');
+      if (storedToken) {
+        token.value = storedToken;
+      }
+    }
+  };
+
+  // Initialize on mount
+  onMounted(() => {
+    initializeToken();
+  });
+
+  const getToken = computed(() => token.value);
 
   const clearTokens = () => {
-    sign.value = null;
+    token.value = null;
+    if (process.client) {
+      localStorage.removeItem('access_token');
+    }
   };
 
   const setTokens = async (payload) => {
-    sign.value = payload;
+    token.value = payload;
+    if (process.client) {
+      if (payload) {
+        localStorage.setItem('access_token', payload);
+      } else {
+        localStorage.removeItem('access_token');
+      }
+    }
   };
 
   return {
-    sign,
+    token,
     getToken,
     clearTokens,
     setTokens,
+    initializeToken,
   };
 });
 
