@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     public: {
-      KEY: "skeptik-Auth",
+      KEY: "access_token",
       MAIN_API_URL,
     },
   },

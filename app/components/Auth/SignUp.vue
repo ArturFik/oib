@@ -3,7 +3,7 @@
     <input
       type="text"
       placeholder="Имя пользователя"
-      v-model="user.name"
+      v-model="user.username"
     />
     <input
       type="email"
@@ -28,7 +28,7 @@ const { user, signUp } = useAuth();
 const emit = defineEmits(["register"]);
 
 const registerData = reactive({
-  username: "",
+  userusername: "",
   email: "",
   password: "",
 });
@@ -37,7 +37,7 @@ const register = () => {
   console.log("Регистрация:", registerData);
   emit("register", registerData);
   // Очистка формы после отправки
-  registerData.username = "";
+  registerData.userusername = "";
   registerData.email = "";
   registerData.password = "";
 };

@@ -39,7 +39,7 @@ import { ref } from "vue";
 import SignUp from "@/components/Auth/SignUp.vue";
 import SignIn from "@/components/Auth/SignIn.vue";
 
-const activeTab = ref("register");
+const activeTab = ref("login");
 
 const handleRegister = (data) => {
   console.log("Зарегистрирован пользователь:", data);

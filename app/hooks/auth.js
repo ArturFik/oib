@@ -2,13 +2,15 @@ import { useUserStore } from "~/stores/user";
 import API_HANDLER from "~/hooks/api_handler";
 import { REGISTER, LOGIN_ACCESS_TOKEN, GET_CURRENT_USER } from "~/configs/api/urls";
 import { CORE } from "~/configs/routes/core";
+import { useCoreAuthStore } from "~/stores/auth";
 
 export default function useAuth() {
   const userStore = useUserStore();
+  const useAuth = useCoreAuthStore()
 
   const user = reactive({
     email: "",
-    name: "",
+    username: "",
     password: "",
   });
 
@@ -19,9 +21,9 @@ export default function useAuth() {
   const errorList = ref([]);
 
 
-  const validationName = computed(() => {
+  const validationusername = computed(() => {
     if (validateHandler.value) {
-      return user.name.length >= 1;
+      return user.username.length >= 1;
     }
   });
 
@@ -46,7 +48,7 @@ export default function useAuth() {
 
   const registerValid = computed(() => {
     return (
-      validationName.value &&
+      validationusername.value &&
       validationEmail.value
     );
   });
@@ -64,8 +66,8 @@ export default function useAuth() {
           
         },
       });
-      if (register?.status) {
-        location.href = `${CORE.ROOT}`;
+      if (register) {
+        window.location.reload();
       } else {
         errorList.value = register?.message?.errors;
       }
@@ -91,9 +93,9 @@ export default function useAuth() {
         body,
       });
       if (login) {
-        userStore.setToken(login);
-        //location.href = `${CORE.ROOT}`;
-        console.log("успешная авторизация");
+        //useAuth.setTokens(login);
+        //location.href = `${CORE.AUTH}`;
+        console.log("успешная авторизация", login);
       } else {
         errorMassage.value = "Неправильный логин или пароль";
       }

@@ -1,9 +1,7 @@
 import AUTH from "~/configs/routes/auth";
-import { useUserStore } from "~/stores/user";
 
 async function downloadFile(url) {
   try {
-    const { getToken } = useUserStore();
 
     const headers = {};
 
@@ -48,13 +46,14 @@ export default async function API_HANDLER(payload) {
   const { path, method, args, isDownload = false, headers = {}, ...params } =
     payload;
   const { MAIN_API_URL } = useRuntimeConfig().public;
-  const { getToken } = useUserStore();
+  const { getToken } = useCoreAuthStore()
 
   const url = `${MAIN_API_URL}/${path}${args ? args : ""}`;
 
   const authHeaders = {
     ...headers,
   };
+
 
   if (getToken?.access_token && getToken?.token_type) {
     authHeaders.Authorization = `${getToken.token_type} ${getToken.access_token}`;

@@ -2,15 +2,10 @@ import {defineStore, acceptHMRUpdate} from 'pinia'
 
 export const useUserStore = defineStore('user', () => {
     const user = ref(null)
-    const token = ref(null)
 
     const setUser = async (userData) => user.value = userData
 
     const getUser = computed(() => user.value)
-
-    const setToken = async (tokenData) => token.value = tokenData
-
-    const getToken = computed(() => token.value)
 
     const getUserStatus = computed(() => {
         if(!getUser.value) {
@@ -33,10 +28,7 @@ export const useUserStore = defineStore('user', () => {
         setUser,
         getUser,
         userName,
-        getUserStatus,
-        token,
-        setToken,
-        getToken
+        getUserStatus
     }
 })
 
