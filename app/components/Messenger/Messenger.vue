@@ -65,15 +65,15 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "ProgramComponent",
-  methods: {
-    goToProgram(url) {
-      this.$router.push(`/${url}`);
-    },
-  },
-};
+<script setup>
+import API_HANDLER from "~/hooks/api_handler";
+import { GET_MODULE } from "~/configs/api/urls";
+const route = useRoute()
+
+onMounted(async() => {
+    const resData = API_HANDLER(GET_MODULE({module_id: route.params.module_id}))
+    console.log(resData)
+})
 </script>
 
 <style lang="scss" scoped>
