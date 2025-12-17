@@ -109,17 +109,7 @@
 </template>
 
 <script setup>
-import API_HANDLER from "~/hooks/api_handler";
-import { GET_BOOK_IMAGE } from "~/configs/api/urls";
-console.log("efwfwe");
-onMounted(async () => {
-  try {
-    const resData = await API_HANDLER(GET_BOOK_IMAGE({book_id: 'sdsd'}));
-    
-  } catch (err) {
-    console.log("efwfwe");
-  }
-});
+
 </script>
 
 <style lang="scss" scoped>
