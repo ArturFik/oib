@@ -1,31 +1,34 @@
 <template>
-  <div class="auth-form">
+  <form class="auth-form" @submit.prevent="signUp()">
     <input
       type="text"
       placeholder="Имя пользователя"
-      v-model="registerData.username"
+      v-model="user.username"
     />
     <input
       type="email"
       placeholder="Почта"
-      v-model="registerData.email"
+      v-model="user.email"
     />
     <input
       type="password"
       placeholder="Пароль"
-      v-model="registerData.password"
+      v-model="user.password"
     />
-    <a href="#" @click.prevent="register">ЗАРЕГИСТРИРОВАТЬСЯ</a>
-  </div>
+    <button type="submit">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+  </form>
 </template>
 
 <script setup>
 import { reactive } from "vue";
+import useAuth from "~/hooks/auth";
+
+const { user, signUp } = useAuth();
 
 const emit = defineEmits(["register"]);
 
 const registerData = reactive({
-  username: "",
+  userusername: "",
   email: "",
   password: "",
 });
@@ -34,7 +37,7 @@ const register = () => {
   console.log("Регистрация:", registerData);
   emit("register", registerData);
   // Очистка формы после отправки
-  registerData.username = "";
+  registerData.userusername = "";
   registerData.email = "";
   registerData.password = "";
 };
@@ -59,7 +62,7 @@ const register = () => {
     }
   }
 
-  > a {
+  > button {
     font-weight: 400;
     font-size: 16px;
     border-radius: 9999px;

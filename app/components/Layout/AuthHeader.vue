@@ -6,7 +6,9 @@
       <a href="/about">О нас</a>
     </nav>
     <nav class="header__auth">
-      <a href="#">Артем</a>
+      <a href="/auth">Регистрация</a>
+      /
+      <a href="/auth">Вход</a>
       <div class="header__auth--ico">
         <NuxtImg src="/svg/auth.svg" alt="auth" />
       </div>

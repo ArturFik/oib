@@ -7,10 +7,7 @@ const dirs = {
 
 export const CORE = {
   ROOT: `/`,
-  RECOMMENDATIONS: "recommendations-id",
-  BOOK: "book-id",
-  RULES: "/rules",
-  PROFILE: "/profile",
+  AUTH: "/auth",
 };
 
 export default dirs.root;

@@ -1,20 +1,17 @@
 <template>
-  <div class="auth-container">
+  <form class="auth-container" @submit.prevent="signIn()">
     <div v-if="!isForgotPasswordFlow" class="auth-form">
       <input
         type="text"
         placeholder="Почта или имя пользователя"
-        v-model="loginData.identifier"
+        v-model="user.email"
       />
       <input
         type="password"
         placeholder="Пароль"
-        v-model="loginData.password"
+        v-model="user.password"
       />
-      <div class="forgot-password" @click.prevent="startPasswordReset">
-        Забыли пароль?
-      </div>
-      <a href="#" @click.prevent="login">ВОЙТИ</a>
+      <button type="submit">ВОЙТИ</button>
     </div>
 
     <div v-else-if="passwordResetStep === 1" class="auth-form">
@@ -53,11 +50,16 @@
     <div v-if="isForgotPasswordFlow" class="back-button">
       <a href="#" @click.prevent="goBack">Назад</a>
     </div>
-  </div>
+</form>
 </template>
 
 <script setup>
 import { reactive, ref } from "vue";
+import useAuth from "~/hooks/auth";
+import API_HANDLER from "~/hooks/api_handler";
+import { GET_CURRENT_USER } from "~/configs/api/urls";
+
+const { user, signIn } = useAuth();
 
 const emit = defineEmits(["login", "password-reset"]);
 
@@ -81,13 +83,8 @@ const login = () => {
   emit("login", loginData);
 };
 
-const startPasswordReset = () => {
-  isForgotPasswordFlow.value = true;
-  passwordResetStep.value = 1;
-  passwordResetData.email = "";
-  passwordResetData.code = "";
-  passwordResetData.newPassword = "";
-  passwordResetData.confirmPassword = "";
+const startPasswordReset = async () => {
+  const res = await API_HANDLER(GET_CURRENT_USER)
 };
 
 const sendResetCode = () => {
@@ -159,7 +156,7 @@ const goBack = () => {
     }
   }
 
-  > a {
+  > button {
     font-weight: 400;
     font-size: 16px;
     border-radius: 9999px;

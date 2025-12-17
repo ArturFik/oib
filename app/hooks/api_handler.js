@@ -1,10 +1,19 @@
 import AUTH from "~/configs/routes/auth";
+import { useUserStore } from "~/stores/user";
+
+
+const STATIC_TOKEN =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJteS1hcHAiLCJzdWIiOiJjZWVkYjE4Yi0yZWUxLTRkMzktODQ5Ny02NDU4YzkxYmRmMjUiLCJleHAiOjE3NjYwODk3MTMsImlhdCI6MTc2NjAwMzMxM30.Vhn07uqooZYe8QeVQMu92umaxEjBM3LHj20CEhCpytg";
+
 
 async function downloadFile(url) {
   try {
     const response = await fetch(url, {
       method: "GET",
       credentials: "include",
+      headers: {
+        Authorization: `Bearer ${STATIC_TOKEN}`,
+      },
     });
     if (!response.ok)
       throw new Error(`Ошибка загрузки файла: ${response.statusText}`);
@@ -37,10 +46,17 @@ async function downloadFile(url) {
 }
 
 export default async function API_HANDLER(payload) {
-  const { path, method, args, isDownload = false, ...params } = payload;
+  const { path, method, args, isDownload = false, headers = {}, ...params } =
+    payload;
   const { MAIN_API_URL } = useRuntimeConfig().public;
+  const { getToken } = useUserStore();
 
   const url = `${MAIN_API_URL}/${path}${args ? args : ""}`;
+
+  const authHeaders = {
+    Authorization: `Bearer ${STATIC_TOKEN}`,
+    ...headers,
+  };
 
   try {
     if (isDownload) {
@@ -49,22 +65,11 @@ export default async function API_HANDLER(payload) {
     const response_data = await $fetch(url, {
       method,
       credentials: "include",
+      headers: authHeaders,
       ...params,
     });
-    /* if (!response_data?.status) {
-      useApiErrorsStore().addError(url, response_data);
-    } */
     return response_data;
   } catch (e) {
     console.log("ER", e);
-    /* if ([403].includes(e.status)) {
-      return; navigateTo(
-        {
-          name: AUTH.LOGOUT,
-          replace: true,
-        },
-        { external: true }
-      );
-    } */
   }
 }

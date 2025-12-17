@@ -1,7 +1,7 @@
 <template>
   <div class="body_page">
     <div class="body_content">
-      <Header />
+      <AuthHeader />
       <slot />
     </div>
     <Footer />
@@ -10,5 +10,5 @@
 
 <script setup>
 import Footer from "~/components/Layout/Footer.vue";
-import Header from "~/components/Layout/Header.vue";
+import AuthHeader from "~/components/Layout/AuthHeader.vue";
 </script>
