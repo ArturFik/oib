@@ -93,8 +93,7 @@ export default function useAuth() {
         body,
       });
       if (login) {
-        //useAuth.setTokens(login);
-        //location.href = `${CORE.AUTH}`;
+        location.href = `${CORE.ROOT}`;
         console.log("успешная авторизация", login);
       } else {
         errorMassage.value = "Неправильный логин или пароль";

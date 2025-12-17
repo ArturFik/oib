@@ -11,9 +11,6 @@
         placeholder="Пароль"
         v-model="user.password"
       />
-      <div class="forgot-password" @click.prevent="startPasswordReset">
-        Забыли пароль?
-      </div>
       <button type="submit">ВОЙТИ</button>
     </div>
 
