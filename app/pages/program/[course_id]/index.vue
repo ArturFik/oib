@@ -39,10 +39,7 @@
           <h2>{{ activeModule.result || activeModule.outcome || 'Практическое освоение материала' }}</h2>
         </div>
       </div>
-      <a :href="`/module/${activeModule.id}`" class="program__view--button" v-if="activeModule.id">
-        НАЧАТЬ МОДУЛЬ
-      </a>
-      <a href="#" class="program__view--button" v-else>
+      <a :href="`/messenger/${activeModule.unique_id}`" class="program__view--button" >
         НАЧАТЬ МОДУЛЬ
       </a>
     </div>
