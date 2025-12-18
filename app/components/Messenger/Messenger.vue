@@ -72,6 +72,42 @@
                   </div>
                 </div>
 
+                <!-- Файл -->
+                <div
+                  v-if="item.type === 'file'"
+                  :class="['message', `message-${item.direction}`]"
+                >
+                  <img
+                    v-if="item.direction === 'incoming' && item.avatar"
+                    :src="getImageUrl(item.avatar)"
+                    alt="avatar"
+                  />
+                  <img
+                    v-else-if="item.direction === 'outgoing'"
+                    src="/svg/logochat3.svg"
+                    alt="avatar"
+                  />
+                  <div class="message-content">
+                    <div class="message-header">
+                      <span class="sender">{{
+                        getSenderName(item.direction, item.blockStage)
+                      }}</span>
+                      <span class="timestamp">{{
+                        item.content.timestamp
+                      }}</span>
+                    </div>
+                    <div class="file-message">
+                      <div class="file-icon">
+                        <img src="/svg/photo.svg" alt="file" />
+                      </div>
+                      <div class="file-info">
+                        <p class="file-name">{{ item.content.file_name }}</p>
+                        <p class="file-message-text">{{ item.content.message }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Системное сообщение -->
                 <div
                   v-if="item.type === 'message' && item.direction === 'system'"
@@ -159,15 +195,16 @@ const nextBlock = computed(() => {
   return allBlocks.value[currentStageIndex.value + 1];
 });
 
-// Все сообщения текущего блока с добавлением информации о стейдже
+// Все сообщения и файлы текущего блока с добавлением информации о стейдже
 const allMessages = computed(() => {
   if (!currentBlock.value?.data) return [];
 
   return currentBlock.value.data
-    .filter((item) => item.type === "message")
+    .filter((item) => item.type === "message" || item.type === "file")
     .map((item) => ({
       ...item,
       blockStage: currentBlock.value.stage,
+      direction: item.direction || "incoming", // По умолчанию входящие
     }));
 });
 
@@ -560,6 +597,61 @@ watch(currentBlock, () => {
     padding: 10px;
     background: #f5f5f5;
     border-radius: 10px;
+  }
+
+  // Стили для файлов
+  .file-message {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #e9ecef;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .file-icon {
+      flex-shrink: 0;
+      width: 50px;
+      height: 50px;
+      background: #736bff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 30px;
+        height: 30px;
+        filter: brightness(0) invert(1);
+      }
+    }
+
+    .file-info {
+      flex: 1;
+
+      .file-name {
+        font-weight: 600;
+        font-size: 16px;
+        color: #333;
+        margin: 0 0 5px 0;
+        word-break: break-all;
+      }
+
+      .file-message-text {
+        font-size: 14px;
+        color: #666;
+        margin: 0;
+        line-height: 1.4;
+      }
+    }
   }
 }
 
