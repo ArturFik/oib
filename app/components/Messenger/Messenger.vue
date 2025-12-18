@@ -1,186 +1,290 @@
 <template>
   <div class="program">
     <div class="program__view">
-      <h1>Пробный курс "Мессенджер"</h1>
+      <h1>{{ moduleData?.title || 'Загрузка...' }}</h1>
       <div class="program__view--window">
-        <div class="">
-          <div class="view">
-            <div class="view__column">
-              <h2 class="view__column--h2">приколы</h2>
-              <h2 class="view__column--chat">2 участника</h2>
-            </div>
-            <div class="view__row">
-              <img src="/svg/phone.svg" alt="phone" />
-              <img src="/svg/search.svg" alt="search" />
-              <img src="/svg/dot.svg" alt="dot" />
-            </div>
+        <div class="content-container">
+          <!-- Экран объяснения (explanation) -->
+          <div v-if="currentBlock?.screen === 'explanation'" class="explanation-screen">
+            <div class="explanation-content" v-html="renderedContent"></div>
           </div>
-          <div class="chat">
-            <h2>Сегодня</h2>
 
-            <div class="chat__view">
-              <img src="/svg/logochat1.svg" alt="logochat1" class="" />
-              <div class="">
-                <h2 class="chat__view--text1">Скаммер</h2>
-                <h2 class="chat__view--text2">Здарова</h2>
+          <!-- Экран мессенджера (messenger) -->
+          <div v-if="currentBlock?.screen === 'messenger'" class="messenger-screen">
+            <!-- Шапка мессенджера -->
+            <div class="view">
+              <div class="view__column">
+                <h2 class="view__column--h2">{{ currentBlock.contact_name || 'Чат' }}</h2>
+                <h2 class="view__column--chat">{{ currentBlock.title || '2 участника' }}</h2>
+              </div>
+              <div class="view__row">
+                <img src="/svg/phone.svg" alt="phone" />
+                <img src="/svg/search.svg" alt="search" />
+                <img src="/svg/dot.svg" alt="dot" />
               </div>
             </div>
 
-            <div class="chat__file">
-              <img src="/svg/logochat2.svg" alt="logochat1" class="" />
-              <div class="">
-                <div class="absolute" v-if="stage != 1">
-                  <div class="">!</div>
-                  Вы изучите методы защиты от атак злоумышленников на
-                  компьютеры, серверы, мобильные устройства, электронные
-                  системы, сети и данные, а также отработаете все навыки на
-                  практике.
+            <!-- Контент чата -->
+            <div class="chat">
+              <h2>Сегодня</h2>
+
+              <!-- Отображаемые сообщения из текущего и предыдущих блоков -->
+              <div v-for="item in displayedMessages" 
+                   :key="item.id"
+                   :id="`item-${item.id}`">
+                
+                <!-- Сообщение -->
+                <div v-if="item.type === 'message'" 
+                     :class="['message', `message-${item.direction}`]">
+                  <img v-if="item.direction === 'incoming' && item.avatar" 
+                       :src="getImageUrl(item.avatar)" 
+                       alt="avatar" />
+                  <img v-else-if="item.direction === 'outgoing'" 
+                       src="/svg/logochat3.svg" 
+                       alt="avatar" />
+                  <div class="message-content">
+                    <div class="message-header">
+                      <span class="sender">{{ getSenderName(item.direction, item.blockStage) }}</span>
+                      <span class="timestamp">{{ item.content.timestamp }}</span>
+                    </div>
+                    <p class="message-text">{{ item.content.message }}</p>
+                  </div>
                 </div>
-                <div class="absolute-arrow" v-if="stage != 1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="154"
-                    height="192"
-                    viewBox="0 0 154 192"
-                    fill="none"
-                  >
-                    <path
-                      d="M153.529 1.55567C153.559 0.727809 152.913 0.0317622 152.085 0.000997282C151.258 -0.0297627 150.561 0.616409 150.531 1.44426L152.03 1.49996L153.529 1.55567ZM0.194724 182.384C-0.212971 183.105 0.0411307 184.02 0.762279 184.428L12.5142 191.072C13.2354 191.48 14.1505 191.226 14.5582 190.504C14.9659 189.783 14.7118 188.868 13.9906 188.46L3.54448 182.555L9.45023 172.109C9.85794 171.387 9.60383 170.472 8.88267 170.065C8.16151 169.657 7.24639 169.911 6.83869 170.632L0.194724 182.384ZM10.5534 180.609L10.1521 179.163L10.5534 180.609ZM10.5534 180.609L10.1521 179.163L1.09919 181.677L1.5005 183.122L1.90181 184.568L10.9547 182.054L10.5534 180.609ZM152.03 1.49996L150.531 1.44426C147.428 84.9315 90.6513 156.811 10.1521 179.163L10.5534 180.609L10.9547 182.054C92.7128 159.352 150.378 86.3485 153.529 1.55567L152.03 1.49996Z"
-                      fill="black"
-                    />
-                  </svg>
+
+                <!-- Системное сообщение -->
+                <div v-if="item.type === 'message' && item.direction === 'system'" 
+                     class="system-message">
+                  <p>{{ item.content.message }}</p>
                 </div>
-                <h2 class="chat__file--text1">Галерея.apk</h2>
-                <h2 class="chat__file--text2">22 B</h2>
               </div>
-            </div>
-            <span>Это ты на фотке?</span>
-            <div class="chat__view">
-              <img src="/svg/logochat3.svg" alt="logochat1" class="" />
-              <div class="">
-                <h2 class="chat__view--text1">Я</h2>
-                <h2 class="chat__view--text2">
-                  инпута на ввод не будет, будет выбор ответов (3-4 сообщения на
-                  выбор)
-                </h2>
-              </div>
-            </div>
-            <div class="chat__button">
-              <h2>Вариант 1</h2>
-              <h2>Вариант 2</h2>
-              <h2>Вариант 3</h2>
-              <h2>Вариант 4</h2>
             </div>
           </div>
         </div>
       </div>
-      <div class="">
-        <div class="blocktext" v-if="stage === 4">
+
+      <!-- Блок с пояснением из СЛЕДУЮЩЕГО стейджа -->
+      <div v-if="showNextStageExplanation" class="explanation-block">
+        <div class="blocktext">
           <h2>Пояснение</h2>
-          <p>
-            Вы изучите методы защиты от атак злоумышленников на компьютеры,
-            серверы, мобильные устройства, электронные системы, сети и данные, а
-            также отработаете все навыки на практике. Вы изучите методы защиты
-            от атак злоумышленников на компьютеры, серверы, мобильные
-            устройства, электронные системы, сети и данные, а также отработаете
-            все навыки на практике. Вы изучите методы защиты от атак
-            злоумышленников на компьютеры, серверы, мобильные устройства,
-            электронные системы, сети и данные, а также отработаете все навыки
-            на практике. Вы изучите методы защиты от атак злоумышленников на
-            компьютеры, серверы, мобильные устройства, электронные системы, сети
-            и данные, а также отработаете все навыки на практике.
-          </p>
+          <div class="explanation-content">
+            <div v-for="(notification, index) in nextStageNotifications" 
+                 :key="notification.id"
+                 class="explanation-item">
+              <div class="explanation-number">{{ index + 1 }}.</div>
+              <p>{{ notification.content.message }}</p>
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- Кнопки навигации -->
       <div class="program__view--button">
-        <h2 class="program__view--text1" @click="goToProgram('minus')">
+        <button class="program__view--text1" 
+                @click="goToStage('prev')"
+                :disabled="currentStageIndex === 0">
           НАЗАД
-        </h2>
-        <h2 class="program__view--text2" @click="goToProgram('plus')">ДАЛЕЕ</h2>
+        </button>
+        <button class="program__view--text2" 
+                @click="goToStage('next')"
+                :disabled="isLastStage">
+          ДАЛЕЕ
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import API_HANDLER from "~/hooks/api_handler";
-import { GET_MODULE } from "~/configs/api/urls";
-import { ref } from "vue";
+import API_HANDLER from '~/hooks/api_handler';
+import { GET_MODULE } from '~/configs/api/urls';
+import { marked } from 'marked';
+
 const route = useRoute();
-const stage = ref(1);
+const moduleData = ref(null);
+const currentStageIndex = ref(0);
+const displayedItemIndex = ref(0);
+const isProcessing = ref(false);
+const allMessagesShown = ref(false);
 
-const goToProgram = (data) => {
-  if (data === "plus") {
-    stage.value = stage.value + 1;
+// Получаем все блоки
+const allBlocks = computed(() => {
+  return moduleData.value?.content_json?.data?.blocks || [];
+});
 
-    if (stage.value === 5) {
-      route.push(`/program/${courseId}`);
-    }
+// Получаем текущий блок на основе индекса этапа
+const currentBlock = computed(() => {
+  if (!allBlocks.value.length) return null;
+  return allBlocks.value[currentStageIndex.value];
+});
+
+// Получаем следующий блок (для пояснений)
+const nextBlock = computed(() => {
+  if (!allBlocks.value.length || currentStageIndex.value >= allBlocks.value.length - 1) return null;
+  return allBlocks.value[currentStageIndex.value + 1];
+});
+
+// Все сообщения текущего блока с добавлением информации о стейдже
+const allMessages = computed(() => {
+  if (!currentBlock.value?.data) return [];
+  
+  return currentBlock.value.data
+    .filter(item => item.type === 'message')
+    .map(item => ({
+      ...item,
+      blockStage: currentBlock.value.stage
+    }));
+});
+
+// Отображаемые сообщения (постепенно)
+const displayedMessages = computed(() => {
+  return allMessages.value.slice(0, displayedItemIndex.value + 1);
+});
+
+// Все ли сообщения показаны
+const areAllMessagesShown = computed(() => {
+  return displayedItemIndex.value >= allMessages.value.length - 1;
+});
+
+// Уведомления из СЛЕДУЮЩЕГО блока
+const nextStageNotifications = computed(() => {
+  if (!nextBlock.value?.data) return [];
+  return nextBlock.value.data.filter(item => item.type === 'notification');
+});
+
+// Проверяем, есть ли уведомления в следующем блоке
+const hasNextStageNotifications = computed(() => {
+  return nextStageNotifications.value.length > 0;
+});
+
+// Показывать пояснение из следующего стейджа
+const showNextStageExplanation = computed(() => {
+  return areAllMessagesShown.value && hasNextStageNotifications.value;
+});
+
+// Рендеринг markdown контента
+const renderedContent = computed(() => {
+  if (!currentBlock.value?.content || currentBlock.value.content_type !== 'markdown') return '';
+  return marked(currentBlock.value.content);
+});
+
+// Проверка последнего ли этапа
+const isLastStage = computed(() => {
+  return currentStageIndex.value === allBlocks.value.length - 1;
+});
+
+// Получение имени отправителя с учетом стейджа
+const getSenderName = (direction, blockStage) => {
+  if (direction === 'outgoing') return 'Я';
+  if (direction === 'incoming') {
+    // Находим блок по stage для получения contact_name
+    const block = allBlocks.value.find(b => b.stage === blockStage);
+    return block?.contact_name || 'Собеседник';
   }
-  if (data === "minus") {
-    if (stage.value != 1) {
-      stage.value = stage.value - 1;
+  return '';
+};
+
+// Получение URL изображения с учетом стейджа
+const getImageUrl = (imageId) => {
+  if (imageId === 'REPLACE_WITH_SNDK_AVATAR_IMAGE_ID') {
+    return '/svg/logochat1.svg';
+  }
+  return `/api/images/${imageId}`;
+};
+
+// Получаем аватар для сообщения
+const getAvatarForMessage = (blockStage, direction) => {
+  if (direction !== 'incoming') return null;
+  
+  const block = allBlocks.value.find(b => b.stage === blockStage);
+  if (block?.contact_avatar) {
+    return block.contact_avatar;
+  }
+  return null;
+};
+
+// Обработка очереди сообщений с задержками
+const processMessageQueue = async () => {
+  if (isProcessing.value || !currentBlock.value?.data) return;
+  
+  isProcessing.value = true;
+  const messages = allMessages.value;
+  
+  // Сбрасываем счетчик
+  displayedItemIndex.value = 0;
+  
+  for (let i = 0; i < messages.length; i++) {
+    displayedItemIndex.value = i;
+    
+    // Если есть задержка, ждем
+    if (messages[i].delay && messages[i].delay > 0) {
+      await new Promise(resolve => setTimeout(resolve, messages[i].delay * 1000));
     }
+    
+    // Обновляем DOM после каждого сообщения
+    await nextTick();
+  }
+  
+  // После показа всех сообщений
+  allMessagesShown.value = true;
+  isProcessing.value = false;
+};
+
+// Переход по этапам
+const goToStage = async (direction) => {
+  if (direction === 'next' && !isLastStage.value) {
+    currentStageIndex.value++;
+    displayedItemIndex.value = 0;
+    allMessagesShown.value = false;
+    await nextTick();
+    processMessageQueue();
+  } else if (direction === 'prev' && currentStageIndex.value > 0) {
+    currentStageIndex.value--;
+    displayedItemIndex.value = 0;
+    allMessagesShown.value = false;
+    await nextTick();
+    processMessageQueue();
   }
 };
 
-onMounted(async () => {
-  const resData = API_HANDLER(
-    GET_MODULE({ module_id: route.params.module_id })
-  );
-  console.log(resData);
+// Загрузка данных модуля
+const loadModuleData = async () => {
+  try {
+    const resData = await API_HANDLER(
+      GET_MODULE({ module_id: route.params.module_id })
+    );
+    
+    moduleData.value = resData;
+    
+    await nextTick();
+    processMessageQueue();
+    
+  } catch (error) {
+    console.error('Ошибка загрузки модуля:', error);
+  }
+};
+
+onMounted(() => {
+  loadModuleData();
+});
+
+watch(currentBlock, () => {
+  displayedItemIndex.value = 0;
+  allMessagesShown.value = false;
+  processMessageQueue();
 });
 </script>
 
 <style lang="scss" scoped>
-.blocktext {
-  max-width: 1234px;
-  margin-right: auto;
-  margin-left: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  color: #fff;
-}
-
-.absolute {
-  position: absolute;
-  background-color: white;
-  border: 1px solid yellow;
-  width: 400px;
-  bottom: 250px;
-  left: 250px;
-  display: flex;
-  flex-direction: row;
-  align-items: start;
-  gap: 20px;
-  padding: 20px 30px 20px 10px;
-  > div {
-    border: 1px solid yellow;
-    width: 220px;
-    height: 50px;
-    border-radius: 9999px;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    color: yellow;
-  }
-}
-.absolute-arrow {
-  position: absolute;
-  top: -150px;
-  left: 150px;
-}
-
 .program {
   background-color: #736bff;
   margin: 0;
   border-radius: 50px;
   margin-bottom: 50px;
+  
   &__view {
     border-radius: 50px;
-
     margin-bottom: 20px;
+    
     > h1 {
       font-size: 36px;
       font-weight: 700;
@@ -192,165 +296,275 @@ onMounted(async () => {
       margin-right: auto;
       padding: 3% 5%;
     }
-
-    > h2 {
-      font-size: 18px;
-      font-weight: 300;
-    }
-    > div {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
+    
     &--window {
       background-color: #fff;
-      > div {
-        max-width: 1234px;
-        margin-right: auto;
-        margin-left: auto;
-        width: 100%;
+      min-height: 500px;
+      max-width: 1234px;
+      margin: 0 auto;
+      
+      .content-container {
+        padding: 20px;
       }
     }
+    
     &--button {
       max-width: 1234px;
-      margin-right: auto;
-      margin-left: auto;
-      width: 100%;
+      margin: 20px auto;
       display: flex;
-      flex-direction: row;
-      align-items: center;
       justify-content: space-between;
       padding: 3% 5%;
-    }
-    &--text1 {
-      padding: 20px 40px;
-      background-color: #ffffff;
-      border-radius: 9999px;
-      font-size: 18px;
-      font-weight: 600;
-      transition: all 0.1s ease;
-      &:hover {
-        transform: scaleX(1.05);
-      }
-    }
-    &--text2 {
-      padding: 20px 40px;
-      background-color: #93e42b;
-      border-radius: 9999px;
-      font-size: 18px;
-      font-weight: 600;
-      transition: all 0.1s ease;
-      &:hover {
-        transform: scaleX(1.05);
+      
+      button {
+        padding: 20px 40px;
+        border-radius: 9999px;
+        font-size: 18px;
+        font-weight: 600;
+        transition: all 0.1s ease;
+        border: none;
+        cursor: pointer;
+        
+        &:hover:not(:disabled) {
+          transform: scaleX(1.05);
+        }
+        
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        
+        &.program__view--text1 {
+          background-color: #ffffff;
+        }
+        
+        &.program__view--text2 {
+          background-color: #93e42b;
+        }
       }
     }
   }
 }
 
+// Стили для мессенджера
 .view {
   display: flex;
-  flex-direction: row;
-  align-items: end;
   justify-content: space-between;
+  align-items: center;
   border-bottom: 1px solid #777777;
-  padding: 30px 0 20px 0;
+  padding: 30px 0 20px;
+  
   &__column {
     text-align: left;
+    
+    &--h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+    }
+    
     &--chat {
       font-weight: 500;
       font-size: 20px;
       color: #777777;
+      margin: 5px 0 0 0;
     }
   }
+  
   &__row {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    > img {
+    gap: 15px;
+    
+    img {
       width: 50px;
+      height: 50px;
       transition: all 0.1s ease;
+      cursor: pointer;
+      
       &:hover {
-        transform: scaleX(1.1);
+        transform: scale(1.1);
       }
     }
   }
 }
 
+// Стили для чата
 .chat {
+  padding: 20px;
+  
   > h2 {
-    margin-left: auto;
-    margin-right: auto;
     text-align: center;
     border-radius: 9999px;
     border: 1px solid #777777;
-    width: 200px;
+    padding: 10px 20px;
+    margin: 20px auto;
+    width: fit-content;
   }
-  > span {
-    color: #000;
-    font-size: 20px;
-    font-weight: 400;
-    margin-left: 120px;
-  }
-  &__view {
+  
+  .message {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-    > img {
-      width: 80px;
-    }
-    &--text1 {
-      color: #736bff;
-      font-size: 20px;
-      font-weight: 600;
-    }
-    &--text2 {
-      color: #000;
-      font-size: 20px;
-      font-weight: 400;
-    }
-  }
-  &__file {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-    margin-left: 120px;
+    align-items: flex-start;
+    gap: 15px;
     margin-bottom: 20px;
-    > div {
+    
+    img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    &-content {
+      max-width: 70%;
+      padding: 15px;
+      border-radius: 20px;
       position: relative;
     }
-    > img {
-      width: 40px;
-      padding: 20px;
-      border-radius: 9999px;
-      background-color: #736bff;
+    
+    &-outgoing {
+      flex-direction: row-reverse;
+      
+      .message-content {
+        background-color: #93e42b;
+        margin-left: auto;
+      }
     }
-    &--text1 {
+    
+    &-incoming {
+      .message-content {
+        background-color: #f0f0f0;
+      }
+    }
+    
+    &-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+      
+      .sender {
+        font-weight: 600;
+        color: #736bff;
+        font-size: 18px;
+      }
+      
+      .timestamp {
+        font-size: 14px;
+        color: #777777;
+      }
+    }
+    
+    &-text {
+      margin: 0;
+      line-height: 1.5;
+      font-size: 16px;
       color: #000;
-      font-size: 20px;
-      font-weight: 600;
-    }
-    &--text2 {
-      color: #777777;
-      font-size: 20px;
-      font-weight: 400;
     }
   }
-  &__button {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 20px;
-    border-top: 1px solid #777777;
-    > h2 {
-      border: 1px solid #777777;
-      padding: 10px 20px;
-      border-radius: 20px;
-      transition: all 0.1s ease;
+  
+  .system-message {
+    text-align: center;
+    color: #777777;
+    font-style: italic;
+    margin: 10px 0;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 10px;
+  }
+}
+
+// Блок с пояснением из следующего стейджа
+.explanation-block {
+  max-width: 1234px;
+  margin: 40px auto;
+  animation: fadeIn 0.5s ease-in-out;
+  
+  .blocktext {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    
+    h2 {
+      color: #736bff;
+      font-size: 28px;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+    
+    .explanation-content {
+      .explanation-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #736bff;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: #e9ecef;
+          transform: translateX(5px);
+        }
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        .explanation-number {
+          font-weight: bold;
+          color: #736bff;
+          font-size: 18px;
+          margin-right: 15px;
+          min-width: 25px;
+        }
+        
+        p {
+          font-size: 16px;
+          line-height: 1.6;
+          color: #333;
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Стили для экрана объяснения
+.explanation-screen {
+  padding: 40px;
+  
+  .explanation-content {
+    font-size: 18px;
+    line-height: 1.6;
+    
+    h1, h2, h3 {
+      color: #333;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    
+    p {
+      margin-bottom: 20px;
+    }
+    
+    a {
+      color: #736bff;
+      text-decoration: none;
+      
       &:hover {
-        transform: scaleX(1.05);
+        text-decoration: underline;
       }
     }
   }
