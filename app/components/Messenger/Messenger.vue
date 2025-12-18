@@ -85,13 +85,13 @@
         </div>
       </div>
 
-      <!-- Блок с пояснением из СЛЕДУЮЩЕГО стейджа -->
-      <div v-if="showNextStageExplanation" class="explanation-block">
+      <!-- Блок с пояснением из ТЕКУЩЕГО стейджа -->
+      <div v-if="showCurrentStageExplanation" class="explanation-block">
         <div class="blocktext">
           <h2>Пояснение</h2>
           <div class="explanation-content">
             <div
-              v-for="(notification, index) in nextStageNotifications"
+              v-for="(notification, index) in currentStageNotifications"
               :key="notification.id"
               class="explanation-item"
             >
@@ -115,7 +115,7 @@
           class="program__view--text2"
           @click="goToStage('next')"
           :disabled="
-            isLastStage && !areAllMessagesShown && !showNextStageExplanation
+            isLastStage && !areAllMessagesShown && !showCurrentStageExplanation
           "
         >
           {{ getNextButtonText }}
@@ -181,20 +181,20 @@ const areAllMessagesShown = computed(() => {
   return displayedItemIndex.value >= allMessages.value.length - 1;
 });
 
-// Уведомления из СЛЕДУЮЩЕГО блока
-const nextStageNotifications = computed(() => {
-  if (!nextBlock.value?.data) return [];
-  return nextBlock.value.data.filter((item) => item.type === "notification");
+// Уведомления из ТЕКУЩЕГО блока
+const currentStageNotifications = computed(() => {
+  if (!currentBlock.value?.data) return [];
+  return currentBlock.value.data.filter((item) => item.type === "notification");
 });
 
-// Проверяем, есть ли уведомления в следующем блоке
-const hasNextStageNotifications = computed(() => {
-  return nextStageNotifications.value.length > 0;
+// Проверяем, есть ли уведомления в текущем блоке
+const hasCurrentStageNotifications = computed(() => {
+  return currentStageNotifications.value.length > 0;
 });
 
-// Показывать пояснение из следующего стейджа
-const showNextStageExplanation = computed(() => {
-  return areAllMessagesShown.value && hasNextStageNotifications.value;
+// Показывать пояснение из текущего стейджа
+const showCurrentStageExplanation = computed(() => {
+  return areAllMessagesShown.value && hasCurrentStageNotifications.value;
 });
 
 // Рендеринг markdown контента
@@ -219,7 +219,7 @@ const getNextButtonText = computed(() => {
     return "ПЕРЕЙТИ К ТЕСТАМ";
   }
 
-  if (!areAllMessagesShown.value && !showNextStageExplanation.value) {
+  if (!areAllMessagesShown.value && !showCurrentStageExplanation.value) {
     return "ПОКАЗАТЬ ВСЕ";
   }
 
@@ -297,14 +297,14 @@ const showAllMessages = () => {
 const goToStage = async (direction) => {
   if (direction === "next") {
     // Проверяем, все ли сообщения текущего этапа показаны
-    if (!areAllMessagesShown.value && !showNextStageExplanation.value) {
+    if (!areAllMessagesShown.value && !showCurrentStageExplanation.value) {
       // Если сообщения еще не все показаны, показываем все сразу
       showAllMessages();
       return;
     }
 
-    // Если есть пояснение из следующего стейджа и оно не показано
-    if (showNextStageExplanation.value && !areAllMessagesShown.value) {
+    // Если есть пояснение из текущего стейджа и оно не показано
+    if (showCurrentStageExplanation.value && !areAllMessagesShown.value) {
       // Показываем все сообщения
       showAllMessages();
       return;
@@ -563,7 +563,7 @@ watch(currentBlock, () => {
   }
 }
 
-// Блок с пояснением из следующего стейджа
+// Блок с пояснением из текущего стейджа
 .explanation-block {
   max-width: 1234px;
   margin: 40px auto;
